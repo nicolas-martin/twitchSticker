@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -31,7 +34,13 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Println(globalEmotes)
+	for key, _ := range globalEmotes.Emotes {
+		// fmt.Println(globalEmotes.Emotes[key])
+		emoteId := globalEmotes.Emotes[key].ImageID
+		finalUrl := strings.Replace(globalEmotes.Template.Large, "{image_id}", strconv.Itoa(emoteId), 1)
+		fmt.Println(finalUrl)
+		saveImage(finalUrl, fmt.Sprintf("/Users/nma/go/src/github.com/nicolas-martin/twitchImgGetter/emotes/%s.png", key))
+	}
 
 }
 
@@ -60,14 +69,28 @@ func getGlobalEmotes() *global {
 }
 
 func saveImage(url string, imageName string) {
-	img, _ := os.Create(imageName)
-	defer img.Close()
+	// url := "http://i.imgur.com/m1UIjW1.jpg"
 
-	resp, _ := http.Get(url)
-	defer resp.Body.Close()
+	// don't worry about errors
+	response, e := http.Get(url)
+	if e != nil {
+		log.Fatal(e)
+	}
 
-	b, _ := io.Copy(img, resp.Body)
-	fmt.Println("File size: ", b)
+	defer response.Body.Close()
+
+	//open a file for writing
+	file, err := os.Create(imageName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Use io.Copy to just dump the response body to the file. This supports huge files
+	_, err = io.Copy(file, response.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	file.Close()
+	fmt.Println("Success!")
 }
 
 type global struct {

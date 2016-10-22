@@ -35,37 +35,12 @@ func main() {
 	}
 
 	for key, _ := range globalEmotes.Emotes {
-		// fmt.Println(globalEmotes.Emotes[key])
 		emoteId := globalEmotes.Emotes[key].ImageID
-		finalUrl := strings.Replace(globalEmotes.Template.Large, "{image_id}", strconv.Itoa(emoteId), 1)
+		finalUrl := strings.Replace(globalEmotes.Template.Small, "{image_id}", strconv.Itoa(emoteId), 1)
 		fmt.Println(finalUrl)
-		saveImage(finalUrl, fmt.Sprintf("/Users/nma/go/src/github.com/nicolas-martin/twitchImgGetter/emotes/%s.png", key))
+		saveImage(finalUrl, fmt.Sprintf("/Users/nma/go/src/github.com/nicolas-martin/twitchImgGetter/emotes/small/%s-small.png", key))
 	}
 
-}
-
-func getGlobalEmotes() *global {
-	resp, err := http.Get("https://twitchemotes.com/api_cache/v2/global.json")
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	if resp.Body == nil {
-		panic("ahhh")
-	}
-
-	var globalEmotes global
-
-	dec := json.NewDecoder(resp.Body)
-
-	err2 := dec.Decode(&globalEmotes)
-
-	if err2 != nil {
-		fmt.Println(err)
-	}
-
-	return &globalEmotes
 }
 
 func saveImage(url string, imageName string) {
